@@ -19,12 +19,13 @@ async def lifespan(app: FastAPI):
         await conn.run_sync(SQLModel.metadata.create_all)
 
     yield
-    # --- CÓDIGO DE APAGADO (Opcional) ---
+    # --- CÓDIGO DE APAGADO ---
     print("👋 Apagando aplicación...")
 
 # Inicializa la App con el lifespan
 app = FastAPI(
     title="Administrador para flota de Taxis",
+    description="API para la gestión para flota de taxis, choferes y recaudaciones diarias.",
     version="0.1.0",
     lifespan=lifespan
 )

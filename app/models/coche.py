@@ -60,4 +60,5 @@ class CocheUpdate(SQLModel):
     modelo: str | None = None
     año: str | None = None
     kilometros: int | None = None
+
     estado: str | None = None

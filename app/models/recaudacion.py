@@ -1,15 +1,10 @@
 from datetime import date
 from decimal import Decimal
-from typing import Optional, TYPE_CHECKING
+from typing import Optional
 from sqlmodel import SQLModel, Field, Relationship
 
-from .chofer import ChoferPublic
-from .coche import CochePublic
-
-if TYPE_CHECKING:
-    from .chofer import Chofer
-    from .coche import Coche
-
+from .chofer import Chofer, ChoferPublic
+from .coche import Coche, CochePublic
 
 
 class RecaudacionBase(SQLModel):
@@ -66,9 +61,14 @@ class RecaudacionPublicDetail(RecaudacionPublic):
 
 
 class RecaudacionCreate(SQLModel):
+    # Identificadores relacionados
     chofer_id: int
     coche_id: int
+
+    # Fecha
     fecha_turno: date
+
+    # Valores
     total_recaudado: Decimal
     combustible: Decimal
     otros_gastos: Decimal
@@ -79,7 +79,7 @@ class RecaudacionCreate(SQLModel):
 
 
 class RecaudacionUpdate(SQLModel):
-    # IDs
+    # Identificadores
     id: int | None = None
     coche_id: int | None = None
     chofer_id: int | None = None
@@ -106,5 +106,3 @@ class RecaudacionUpdate(SQLModel):
     h13: Decimal | None = None
     credito: Decimal | None = None
     total_entregar: Decimal | None = None
-
-
