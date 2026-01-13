@@ -2,11 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 from sqlalchemy.orm import joinedload
-from datetime import date
 from typing import List
 
 from ..core.db import get_session
-from ..services.calculadora_recaudaciones import CalculadoraRecaudacion
+from ..services.recaudacion_services import RecaudacionService
 from ..models.recaudacion import (
     Recaudacion, RecaudacionCreate,
     RecaudacionPublic,
@@ -33,64 +32,14 @@ async def crear_recaudacion(
 ):
     """
     Registra una nueva plantilla de recaudación diaria.
-    
-    Esta operación actúa como el **cierre de caja** diario de cada chofer.
-
-    **Automatizaciones**:
-    - Verifica la existencia del **Chofer** y el **Coche** (Claves Foráneas).
-    - **Cálculo Financiero**: Determina automáticamente en base a los datos de entrada
-    los valores de: `líquido`, total_gastos`, `salario`, `aportes`,
-    `sub_total`, `total_entregar`, `km_totales`, `rendimiento`.
+    Delega toda la logica a `recaudacion_service`.
     """
 
-    liquidacion_calculada = CalculadoraRecaudacion.calcular_liquidacion(
-        total_recaudado=datos_entrada.total_recaudado,
-        combustible=datos_entrada.combustible,
-        otros_gastos=datos_entrada.otros_gastos,
-        km_entrada=datos_entrada.km_entrada,
-        km_salida=datos_entrada.km_salida,
-        h13=datos_entrada.h13,
-        credito=datos_entrada.credito,
-    )
+    service = RecaudacionService(session)
 
-    nueva_recaudacion = Recaudacion(
-        chofer_id=datos_entrada.chofer_id,
-        coche_id=datos_entrada.coche_id,
-        fecha_turno=datos_entrada.fecha_turno,
-        fecha_recibida=date.today(),
-    
-        total_recaudado=datos_entrada.total_recaudado,
-        combustible=datos_entrada.combustible,
-        otros_gastos=datos_entrada.otros_gastos,
-        km_entrada=int(datos_entrada.km_entrada),
-        km_salida=int(datos_entrada.km_salida),
-        h13=datos_entrada.h13,
-        credito=datos_entrada.credito,
+    nueva_recaudacion = await service.crear_nueva_recaudacion(datos_entrada)
 
-        salario=liquidacion_calculada["salario"],
-        total_gastos=liquidacion_calculada["total_gastos"],
-        liquido=liquidacion_calculada["liquido"],
-        aportes=liquidacion_calculada["aportes"],
-        sub_total=liquidacion_calculada["sub_total"],
-        total_entregar=liquidacion_calculada["total_entregar"],
-        km_totales=int(liquidacion_calculada["km_totales"]),
-        rendimiento=liquidacion_calculada["rendimiento"],
-    )
-
-    try:
-        session.add(nueva_recaudacion)
-        await session.commit()
-        await session.refresh(nueva_recaudacion)
-
-        return nueva_recaudacion
-
-    except Exception as e:
-        await session.rollback()
-
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al crear la recaudación: {str(e)}"
-        )
+    return nueva_recaudacion
 
 
 @router.get(
