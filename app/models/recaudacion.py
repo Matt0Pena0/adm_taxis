@@ -1,14 +1,23 @@
 from datetime import date
+from enum import Enum
 from decimal import Decimal
 from typing import Optional
+from pydantic import field_validator, model_validator
 from sqlmodel import SQLModel, Field, Relationship
 
 from .chofer import Chofer, ChoferPublic
 from .coche import Coche, CochePublic
 
 
+class Turno(Enum):
+    AM="Mañana"
+    PM="Noche"
+    COMPLETO="Solo"
+
+
 class RecaudacionBase(SQLModel):
     # Fechas
+    turno: Turno
     fecha_turno: date
     fecha_recibida: date
 
@@ -61,11 +70,18 @@ class RecaudacionPublicDetail(RecaudacionPublic):
 
 
 class RecaudacionCreate(SQLModel):
+    """
+    Schema de entrada para crear una Recaudación.
+    
+    Incluye validaciones de integridad para los datos de entrada.
+    """
+
     # Identificadores relacionados
     chofer_id: int
     coche_id: int
 
     # Fecha
+    turno: Turno
     fecha_turno: date
 
     # Valores
@@ -76,6 +92,54 @@ class RecaudacionCreate(SQLModel):
     km_salida: int
     h13: Decimal
     credito: Decimal
+
+    @field_validator("fecha_turno")
+    @classmethod
+    def validar_fecha_turno(cls, v: date):
+        if v > date.today():
+            raise ValueError("La fecha ingresada no es válida, no puede ser una fecha futura")
+        return v
+
+    @field_validator("km_entrada", "km_salida")
+    @classmethod
+    def validar_kilometros(cls, v: str):
+        if not v.isnumeric():
+            raise ValueError("Los kilometros ingresados no son válidos.")
+        return v
+
+    @model_validator(mode="after")
+    def validar_consistencia_kilometros(self) -> 'RecaudacionCreate':
+        if self.km_entrada > self.km_salida:
+            raise ValueError("Los km de entrada, no pueden ser menor que los de salida")
+        return self
+
+    @field_validator(
+        "total_recaudado", 
+        "combustible", 
+        "otros_gastos", 
+        "h13", 
+        "credito"
+    )
+    @classmethod
+    def validar_cinco_digitos_enteros(cls, v: int | Decimal) -> int | Decimal:
+        """
+        Valida restricciones de formato numérico.
+
+        Reglas:
+        - Debe ser un valor positivo (solo dígitos).
+        - Máximo $30000.
+        
+        Raises:
+            ValueError: Si es negativo, excede los $30000.
+        """
+        
+        if v < 0:
+            raise ValueError("El valor debe ser positivo (solo números).")
+
+        if v > 30000:
+            raise ValueError(f"El valor {v} excede el límite permitido (Máx: 30000).")
+
+        return v
 
 
 class RecaudacionUpdate(SQLModel):

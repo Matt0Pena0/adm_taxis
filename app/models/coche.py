@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
 from pydantic import field_validator
@@ -7,17 +8,25 @@ if TYPE_CHECKING:
     from .recaudacion import Recaudacion
 
 
+class EstadoCoche(Enum):
+    ACTIVO="Activo"
+    DISPONIBLE="Disponible"
+    INACTIVO="Inactivo"
+    MANTENIMIENTO="Mantenimiento"
+
+
 class CocheBase(SQLModel):
     # Identificadores
     matricula: str = Field(unique=True, index=True, max_length=4)
-    movil: str = Field(unique=True, index=True)
+    movil: str = Field(unique=True, index=True, max_length=4)
 
     # Caracteristicas
     marca: str
     modelo: str
     año: str
     kilometros: int = Field(default=0)
-    estado: str = Field(default="Activo")
+
+    estado: EstadoCoche = Field(default=EstadoCoche.ACTIVO)
 
     @property
     def matricula_completa(self) -> str:
@@ -41,11 +50,44 @@ class CochePublic(CocheBase):
 
 
 class CocheCreate(CocheBase):
+    """
+    Schema de entrada para crear un Coche.
+
+    Incluye validaciones estrictas de formato (Matrícula y Móvil).
+    """
+
     @field_validator("matricula")
     @classmethod
     def validar_largo_matricula(cls, v: str):
+        """
+        Verifica el formato de la Matrícula.
+
+        Reglas:
+        - Debe tener exactamente 4 dígitos.
+        - Solo debe contener números (sin el 'STX').
+
+        Raises:
+            ValueError: Si la longitud o el contenido no son válidos.
+        """
         if len(v) != 4 or not v.isdigit():
             raise ValueError("La matricula debe tener 4 digitos")
+        return v
+
+    @field_validator("movil")
+    @classmethod
+    def validar_largo_movil(cls, v: str):
+        """
+        Verifica el formato del Móvil.
+
+        Reglas:
+        - Debe tener 4 o menos dígitos.
+        - Solo debe contener números.
+
+        Raises:
+            ValueError: Si la longitud o el contenido no son válidos.
+        """
+        if len(v) > 4 or not v.isdigit():
+            raise ValueError("El número de móvil debe tener 4 o menos digitos")
         return v
 
 

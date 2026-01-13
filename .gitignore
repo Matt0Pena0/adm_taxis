@@ -12,7 +12,9 @@ ENV/
 
 # Base de datos (¡Muy importante no subir esto!)
 *.db
+*.sqlite
 *.sqlite3
+db.sqlite
 
 # IDEs
 .vscode/
@@ -22,3 +24,5 @@ ENV/
 *.log
 
 *.dev.md
+
+test.py
