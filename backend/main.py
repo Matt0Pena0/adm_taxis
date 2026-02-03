@@ -1,12 +1,14 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import SQLModel
 from contextlib import asynccontextmanager
 
-from .routers import test
-from .routers import recaudacion
-from .routers import coche
-from .routers import chofer
-from .core.db import engine
+
+from routers import test
+from routers import recaudacion
+from routers import coche
+from routers import chofer
+from core.db import engine
 
 
 @asynccontextmanager
@@ -30,12 +32,30 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Configuración de CORS
+origins = [
+    "http://localhost",
+    "http://localhost:8080",
+    "http://localhost:5173",
+    "http://127.0.0.1",
+    "http://127.0.0.1:8080",
+    "http://127.0.0.1:5173",
+]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # Rutas
 app.include_router(recaudacion.router)
 app.include_router(coche.router)
 app.include_router(chofer.router)
-
 
 # Ruta test y raíz para verificar que está funcionando la API y rutas.
 app.include_router(test.router)

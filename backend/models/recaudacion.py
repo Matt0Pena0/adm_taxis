@@ -5,11 +5,11 @@ from typing import Optional
 from pydantic import field_validator, model_validator
 from sqlmodel import SQLModel, Field, Relationship
 
-from .chofer import Chofer, ChoferPublic
-from .coche import Coche, CochePublic
+from models.chofer import Chofer, ChoferPublic
+from models.coche import Coche, CochePublic
 
 
-class Turno(Enum):
+class Turnos(str, Enum):
     AM="Mañana"
     PM="Noche"
     COMPLETO="Solo"
@@ -17,7 +17,7 @@ class Turno(Enum):
 
 class RecaudacionBase(SQLModel):
     # Fechas
-    turno: Turno
+    turno: Turnos
     fecha_turno: date
     fecha_recibida: date
 
@@ -81,17 +81,18 @@ class RecaudacionCreate(SQLModel):
     coche_id: int
 
     # Fecha
-    turno: Turno
+    turno: Turnos
     fecha_turno: date
 
-    # Valores
-    total_recaudado: Decimal
-    combustible: Decimal
-    otros_gastos: Decimal
     km_entrada: int
     km_salida: int
-    h13: Decimal
-    credito: Decimal
+
+    # Valores
+    total_recaudado: Decimal = Field(default=0, max_digits=10, decimal_places=2)
+    combustible: Decimal = Field(default=0, max_digits=10, decimal_places=2)
+    otros_gastos: Decimal = Field(default=0, max_digits=10, decimal_places=2)
+    h13: Decimal = Field(default=0, max_digits=10, decimal_places=2)
+    credito: Decimal = Field(default=0, max_digits=10, decimal_places=2)
 
     @field_validator("fecha_turno")
     @classmethod
@@ -102,8 +103,8 @@ class RecaudacionCreate(SQLModel):
 
     @field_validator("km_entrada", "km_salida")
     @classmethod
-    def validar_kilometros(cls, v: str):
-        if not v.isnumeric():
+    def validar_kilometros(cls, v: int):
+        if not v.is_integer():
             raise ValueError("Los kilometros ingresados no son válidos.")
         return v
 

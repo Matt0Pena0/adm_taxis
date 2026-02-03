@@ -3,10 +3,11 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 from typing import List
 
-from app.core.db import get_session
-from app.models.coche import (
+from core.db import get_session
+from models.coche import (
     Coche, CochePublic,
-    CocheCreate, CocheUpdate
+    CocheCreate, CocheUpdate,
+    EstadoCoche
 )
 
 
@@ -27,11 +28,13 @@ async def crear_coche(
         session: AsyncSession = Depends(get_session)
 ):
     """
-    Registra un nuevo coche en la flota.
+    Registra un nuevo coche en la flota.  
+    **Nota: Se recibe solo los números de la matricula, pero debe mostrarse 'STX+matricula' ej: STX 1234
 
     **Reglas de Validación**:
-    - La **matricula** debe ser uúnica y tener 4 dígitos.
+    - La **matricula** debe ser única y tener 4 dígitos.
     - El número de **movil** debe ser único.
+    - Los **kilometros** deben contener únicamente números.
     - El estado inicial será 'Activo' por defecto.
     """
 
@@ -94,7 +97,7 @@ async def obtener_coches(
 @router.get(
     "/{coche_id}",
     response_model=CochePublic,
-    response_description="Coche solicitado"
+    response_description="Coche solicitado."
 )
 async def obtener_coche(
     coche_id: int,
@@ -116,6 +119,12 @@ async def obtener_coche(
         raise HTTPException(status_code=404, detail="Coche no encontrado")
 
     return coche
+
+
+@router.get("/enums/estados")
+async def get_estados_coche():
+    """Retorna una lista de objetos con label y value"""
+    return [{"label": e.value, "value": e.value} for e in EstadoCoche]
 
 
 @router.patch(
@@ -180,7 +189,7 @@ async def dar_baja_coche(
     if not coche_db:
         raise HTTPException(status_code=404, detail="Coche no encontrado")
 
-    coche_db.estado = "Inactivo"
+    coche_db.estado = EstadoCoche.INACTIVO
 
     session.add(coche_db)
     await session.commit()

@@ -2,13 +2,14 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from ..models.chofer import *
-from ..models.coche import *
-from ..models.recaudacion import *
+from models.chofer import *
+from models.coche import *
+from models.recaudacion import *
 
 
 sqlite_file_name = "db.sqlite"
-DATABASE_URL = f"sqlite+aiosqlite:///{sqlite_file_name}"
+path = f"data/{sqlite_file_name}"
+DATABASE_URL = f"sqlite+aiosqlite:///{path}"
 
 engine = create_async_engine(DATABASE_URL, echo=True, future=True)
 

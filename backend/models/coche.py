@@ -5,10 +5,10 @@ from pydantic import field_validator
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from .recaudacion import Recaudacion
+    from models.recaudacion import Recaudacion
 
 
-class EstadoCoche(Enum):
+class EstadoCoche(str, Enum):
     ACTIVO="Activo"
     DISPONIBLE="Disponible"
     INACTIVO="Inactivo"
@@ -21,9 +21,9 @@ class CocheBase(SQLModel):
     movil: str = Field(unique=True, index=True, max_length=4)
 
     # Caracteristicas
-    marca: str
-    modelo: str
-    año: str
+    marca: Optional[str] = Field(default=None)
+    modelo: Optional[str] = Field(default=None)
+    año: Optional[str] = Field(default=None)
     kilometros: int = Field(default=0)
 
     estado: EstadoCoche = Field(default=EstadoCoche.ACTIVO)
@@ -53,7 +53,7 @@ class CocheCreate(CocheBase):
     """
     Schema de entrada para crear un Coche.
 
-    Incluye validaciones estrictas de formato (Matrícula y Móvil).
+    Incluye validaciones estrictas de formato Kilometros, Matrícula y Móvil.
     """
 
     @field_validator("matricula")
@@ -69,8 +69,11 @@ class CocheCreate(CocheBase):
         Raises:
             ValueError: Si la longitud o el contenido no son válidos.
         """
-        if len(v) != 4 or not v.isdigit():
-            raise ValueError("La matricula debe tener 4 digitos")
+        if not v.isdigit():
+            raise ValueError("Solo se permiten números")
+
+        if len(v) != 4 or int(v) > 9999 :
+            raise ValueError("La matrícula debe tener 4 dígitos")
         return v
 
     @field_validator("movil")
@@ -86,8 +89,30 @@ class CocheCreate(CocheBase):
         Raises:
             ValueError: Si la longitud o el contenido no son válidos.
         """
-        if len(v) > 4 or not v.isdigit():
-            raise ValueError("El número de móvil debe tener 4 o menos digitos")
+        if not v.isdigit():
+            raise ValueError("Solo se permiten números")
+
+        if int(v) > 9999:
+            raise ValueError("ALFALFAAAA")
+
+        if len(v) > 4 or int(v) > 9999:
+            raise ValueError("Máximo 4 dígitos")
+        return v
+
+    @field_validator("kilometros")
+    @classmethod
+    def validar_kilometros(cls, v: int):
+        """
+        Verifica el formato de los kilometros.
+
+        Reglas:
+        - Debe tener unicamente números
+
+        Raises:
+            ValueError: Si algún caracter no es válido.
+        """
+        if not v.is_integer():
+            raise ValueError("Solo se permiten números")
         return v
 
 

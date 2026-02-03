@@ -4,13 +4,13 @@ from sqlmodel import select
 from sqlalchemy.orm import joinedload
 from typing import List
 
-from ..core.db import get_session
-from ..services.recaudacion_services import RecaudacionService
-from ..models.recaudacion import (
+from core.db import get_session
+from services.recaudacion_services import RecaudacionService
+from models.recaudacion import (
     Recaudacion, RecaudacionCreate,
     RecaudacionPublic,
     RecaudacionPublicDetail,
-    RecaudacionUpdate
+    RecaudacionUpdate, Turnos
 )
 
 
@@ -31,8 +31,8 @@ async def crear_recaudacion(
     session: AsyncSession = Depends(get_session)
 ):
     """
-    Registra una nueva plantilla de recaudación diaria.
-    Delega toda la logica a `recaudacion_service`.
+    Registra una nueva plantilla de recaudación diaria.  
+    Delega toda la logica a `RecaudacionService` que se encarga de hacer los calculos necesarios
     """
 
     service = RecaudacionService(session)
@@ -45,7 +45,7 @@ async def crear_recaudacion(
 @router.get(
     "/",
     response_model=List[RecaudacionPublicDetail],
-    response_description="Lista pagina de recaudaciones.",
+    response_description="Lista paginada de recaudaciones.",
 )
 async def leer_recaudaciones(
     offset: int = 0,
@@ -85,7 +85,7 @@ async def leer_recaudacion(
     session: AsyncSession = Depends(get_session)
 ):
     """
-    Busca un chofer específico por su ID único interno.
+    Busca una recaudación específica por su ID.
     """
 
     query = (
@@ -106,7 +106,17 @@ async def leer_recaudacion(
     return recaudacion
 
 
-@router.patch("/{recaudacion_id}", response_model=RecaudacionPublicDetail)
+@router.get("/enums/turnos")
+async def get_turnos():
+    """Retorna una lista de objetos con label y value"""
+    return [{"label": e.value, "value": e.value} for e in Turnos]
+
+
+@router.patch(
+    "/{recaudacion_id}",
+    response_model=RecaudacionPublicDetail,
+    response_description="Valores actualizados de la recaudación.",
+)
 async def actualizar_recaudacion(
     recaudacion_id: int,
     recaudacion_update: RecaudacionUpdate,
@@ -143,13 +153,16 @@ async def actualizar_recaudacion(
             detail=f"Error al actualizar la recaudación: {str(e)}"
         )
 
-@router.delete("/{recaudacion_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{recaudacion_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_description="Recaudación eliminada exitosamente.")
 async def eliminar_recaudacion(
     recaudacion_id: int,
     session: AsyncSession = Depends(get_session)
 ):
     """
-    Elimina una recaudación específica por su ID único interno.
+    Elimina una recaudación específica por su ID.
     """
     recaudacion_db = await session.get(Recaudacion, recaudacion_id)
     if not recaudacion_db:

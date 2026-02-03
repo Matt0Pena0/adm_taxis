@@ -1,12 +1,13 @@
 from datetime import date
 from enum import Enum
+import re
 from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
 from pydantic import field_validator
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from .recaudacion import Recaudacion
+    from models.recaudacion import Recaudacion
 
 
 class EstadoChofer(str, Enum):
@@ -14,23 +15,23 @@ class EstadoChofer(str, Enum):
     INACTIVO="Inactivo"
     LICENCIA="Licencia Vacacional"
     LICENCIA_MEDICA="Licencia Médica"
-    BAJA_TEMPORAL="De Baja Temporal"
-    BAJA_PERMANENTE="De Baja Permanente"
+    BAJA_TEMPORAL="Baja Temporal"
+    BAJA_PERMANENTE="Baja Permanente"
 
 
 class ChoferBase(SQLModel):
     # Identificadores
-    codigo_chofer: str = Field(unique=True, index=True)
+    codigo_chofer: str = Field(unique=True, index=True, max_length=5)
     cedula_identidad: str = Field(unique=True, )
 
     # Datos personales
     nombre: str
     apellido: str
-    telefono: str
+    telefono: Optional[str] = Field(default=None)
 
     # Fechas
     vencimiento_libreta: date
-    fecha_ingreso: date
+    fecha_ingreso: date 
     fecha_egreso: Optional[date] = Field(default=None)
 
     estado: EstadoChofer = Field(default=EstadoChofer.ACTIVO)
@@ -64,7 +65,23 @@ class ChoferCreate(ChoferBase):
     sanitización automática de texto (Nombre, Apellido).
     """
 
-    @field_validator("cedula_identidad")
+    @field_validator("codigo_chofer", mode="before")
+    @classmethod
+    def validar_codigo_chofer(cls, v: str) -> str:
+        """
+        Verifica el formato del Código de Chofer.
+
+        Reglas:
+        - Debe tener 5 o menos dígitos
+        """
+        if not v.isdigit():
+            raise ValueError("Solo se permiten números")
+
+        if int(v) > 99999 or len(v) > 5:
+            raise ValueError("Máximo 5 dígitos")
+        return v
+
+    @field_validator("cedula_identidad", mode="before")
     @classmethod
     def validar_cedula_identidad(cls, v: str) -> str:
         """
@@ -111,16 +128,21 @@ class ChoferCreate(ChoferBase):
 
         return v
 
-    @field_validator("nombre", "apellido")
+    @field_validator("nombre", "apellido", mode="before")
     @classmethod
     def formatear_nombre_apellido(cls, v: str) -> str:
         """
         Sanitización de texto: Normaliza los campos 'nombre' y 'apellido' a formato Título.
         
+        Reglas:
+        - Solo se aceptan letras.
+
         Transformación:
         1. Elimina espacios en blanco al inicio y final.
         2. Convierte la primera letra de cada palabra a mayúscula.
         """
+        if not re.match(r"^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$", str(v)):
+            raise ValueError("Nombre no válido. Solo se permiten letras.")
         return v.strip().title()
 
 

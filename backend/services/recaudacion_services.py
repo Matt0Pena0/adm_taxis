@@ -5,9 +5,9 @@ from typing import Dict
 from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.models.chofer import Chofer, EstadoChofer
-from app.models.coche import Coche #, EstadoCoche
-from app.models.recaudacion import Recaudacion, RecaudacionCreate
+from models.chofer import Chofer, EstadoChofer
+from models.coche import Coche #, EstadoCoche
+from models.recaudacion import Recaudacion, RecaudacionCreate
 
 
 class RecaudacionService:
@@ -111,7 +111,7 @@ class RecaudacionService:
 
         Raises:
             HTTPException (400): Si hay inconsistencia de datos o estado.
-            HTTPException (404): Si no existen las entidades relacionadas.
+            HTTPException (404): Si no existen las entidades relacionadas. (Chofer o Coche)
         """
 
 

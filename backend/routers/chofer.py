@@ -3,10 +3,11 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 from typing import List
 
-from app.core.db import get_session
-from app.models.chofer import (
+from core.db import get_session
+from models.chofer import (
     Chofer, ChoferPublic,
-    ChoferCreate, ChoferUpdate
+    ChoferCreate, ChoferUpdate,
+    EstadoChofer
 )
 
 
@@ -30,8 +31,12 @@ async def crear_chofer(
     Registra un nuevo chofer en la flota.
 
     **Reglas de Validación**:
-    - El **codigo_chofer** debe ser único.
-    - La **cedula_identidad** debe ser única.
+    - El **codigo_chofer** debe ser único y debe ser solo números.
+    - La **cedula_identidad** debe ser única y debe ser solo números.
+    - Valida el formato de la Cédula de Identidad, deben ser 8 digitos sin puntos ni guiones.
+    ej: 51234567
+    - Valida el formato del Teléfono, deben ser 8 o 9 digitos empezando por 09 o 9
+    ejs: 099123456, 99123456
     - El estado inicial será 'Activo' por defecto.
     """
 
@@ -101,7 +106,7 @@ async def leer_chofer(
     session: AsyncSession = Depends(get_session)
 ):
     """
-    Busca un chofer específico por su ID único interno.
+    Busca un chofer específico por su ID.
     """
 
     query = (
@@ -116,6 +121,12 @@ async def leer_chofer(
         raise HTTPException(status_code=404, detail="Chofer no encontrado")
 
     return chofer
+
+
+@router.get("/enums/estados")
+async def get_estados_chofer():
+    """Retorna una lista de objetos con label y value"""
+    return [{"label": e.value, "value": e.value} for e in EstadoChofer]
 
 
 @router.patch(
@@ -180,7 +191,7 @@ async def dar_baja_chofer(
     if not chofer_db:
         raise HTTPException(status_code=404, detail="Chofer no encontrado")
 
-    chofer_db.estado = "De Baja"
+    chofer_db.estado = EstadoChofer.BAJA_PERMANENTE
 
     session.add(chofer_db)
     await session.commit()
