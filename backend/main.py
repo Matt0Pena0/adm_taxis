@@ -4,7 +4,6 @@ from sqlmodel import SQLModel
 from contextlib import asynccontextmanager
 
 
-from routers import test
 from routers import recaudacion
 from routers import coche
 from routers import chofer
@@ -58,7 +57,6 @@ app.include_router(coche.router)
 app.include_router(chofer.router)
 
 # Ruta test y raíz para verificar que está funcionando la API y rutas.
-app.include_router(test.router)
 
 @app.get("/")
 def read_root():
