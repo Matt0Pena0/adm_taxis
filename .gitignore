@@ -16,11 +16,6 @@ env/
 venv/
 ENV/
 
-# Base de datos (¡Muy importante no subir esto!)
-*.db
-*.sqlite
-*.sqlite3
-db.sqlite
 
 # IDEs
 .vscode/

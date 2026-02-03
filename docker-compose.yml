@@ -1,0 +1,12 @@
+services:
+  backend:
+    build:
+      context: ./backend # Ruta a la carpeta del back
+      target: development # Etapa del Dockerfile
+    image: my-app-backend:latest
+
+  frontend:
+    build:
+      context: ./frontend # Ruta a la carpeta del front
+      target: development
+    image: my-app-frontend:latest
