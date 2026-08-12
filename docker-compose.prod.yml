@@ -1,9 +1,6 @@
 services:
   backend:
-    build:
-      context: ./backend
-      target: production
-    image: adm-taxi-backend:latest
+    image: ghcr.io/matt0pena0/adm_taxis/backend:latest
     restart: unless-stopped
     volumes:
       - ./backend/data:/app/data
@@ -13,10 +10,7 @@ services:
       - internal
 
   frontend:
-    build:
-      context: ./frontend
-      target: production
-    image: adm-taxi-frontend:latest
+    image: ghcr.io/matt0pena0/adm_taxis/frontend:latest
     restart: unless-stopped
     expose:
       - "80"
@@ -30,7 +24,7 @@ services:
     container_name: adm_taxis-nginx
     restart: unless-stopped
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/nginx-prod.conf:/etc/nginx/nginx.conf:ro
     expose:
       - "80"
     networks:

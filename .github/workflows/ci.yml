@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job: Backend — pytest (SQLite in-memory, no live DB needed by tests)
+  # ---------------------------------------------------------------------------
+  test-backend:
+    name: "Backend Tests (pytest)"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Set up Buildx so docker compose build can use GHA layer cache
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker
+          install: true
+
+      # Build the backend image (uses Buildx GHA cache, target: development is selected automatically)
+      - name: Build backend image
+        run: docker compose build backend
+
+      # Run tests using pytest on the backend container
+      - name: Run backend tests
+        run: docker compose run --rm backend pytest tests/ -v
+
+      # Dump service logs on failure to aid debugging
+      - name: Dump service logs on failure
+        if: failure()
+        run: docker compose logs
