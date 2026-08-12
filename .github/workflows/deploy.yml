@@ -1,0 +1,62 @@
+name: Deploy to Production VPS
+
+on:
+  push:
+    branches:
+      - main   # Cambia a 'main' o añade las ramas desde las cuales desees desplegar
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Obtener el código del repositorio
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Copiar archivos al servidor VPS excluyendo archivos de desarrollo local/BD
+      - name: Copy files via SCP to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          source: "./"
+          target: "/opt/adm_taxis"
+          rm: false # Conserva archivos existentes en la VPS (como /opt/adm_taxis/backend/data/db.sqlite)
+          tar_tmp_path: "/tmp"
+          # Excluimos directorios pesados y archivos que no deben ser sobreescritos (como la Base de Datos)
+          strip_components: 0
+          exclude: |
+            **/.git
+            **/.github
+            **/node_modules
+            **/venv
+            **/.venv
+            **/backend/data/db.sqlite
+            **/backend/data/db.sqlite-journal
+            **/backend/__pycache__
+            **/.pytest_cache
+
+      # 3. Ejecutar comandos de despliegue en la VPS via SSH
+      - name: SSH Command Execution
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            # Entrar al directorio del proyecto en la VPS
+            cd /opt/adm_taxis
+
+            # En producción la red proxy_net debe existir para NPM.
+            # Este comando la crea automáticamente si no existe y no da error si ya existe.
+            docker network inspect proxy_net >/dev/null 2>&1 || docker network create proxy_net
+
+            # Levantar contenedores en producción aplicando la build limpia
+            docker compose -f docker-compose.yml up --build -d
+
+            # Limpiar imágenes huérfanas de compilaciones anteriores para ahorrar espacio en disco
+            docker image prune -f

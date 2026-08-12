@@ -1,12 +1,47 @@
 services:
   backend:
     build:
-      context: ./backend # Ruta a la carpeta del back
-      target: development # Etapa del Dockerfile
+      context: ./backend
+      target: production
     image: adm-taxi-backend:latest
+    restart: unless-stopped
+    volumes:
+      - ./backend/data:/app/data
+    expose:
+      - "8000"
+    networks:
+      - internal
 
   frontend:
     build:
-      context: ./frontend # Ruta a la carpeta del front
-      target: development
+      context: ./frontend
+      target: production
     image: adm-taxi-frontend:latest
+    restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      - internal
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:alpine
+    container_name: adm_taxis-nginx
+    restart: unless-stopped
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    expose:
+      - "80"
+    networks:
+      - internal
+      - proxy_net
+    depends_on:
+      - backend
+      - frontend
+
+networks:
+  internal:
+    driver: bridge
+  proxy_net:
+    external: true
