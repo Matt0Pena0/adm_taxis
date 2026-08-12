@@ -30,8 +30,8 @@ class ChoferBase(SQLModel):
     telefono: Optional[str] = Field(default=None)
 
     # Fechas
-    vencimiento_libreta: date
-    fecha_ingreso: date 
+    vencimiento_libreta: Optional[date] = Field(default=None)
+    fecha_ingreso: Optional[date] = Field(default=None) 
     fecha_egreso: Optional[date] = Field(default=None)
 
     estado: EstadoChofer = Field(default=EstadoChofer.ACTIVO)
@@ -64,6 +64,24 @@ class ChoferCreate(ChoferBase):
     Incluye validaciones estrictas de formato (CI, Teléfono) y 
     sanitización automática de texto (Nombre, Apellido).
     """
+
+    @field_validator(
+    "codigo_chofer",
+    "cedula_identidad",
+    "nombre",
+    "apellido",
+    mode="before",
+    )
+    @classmethod
+    def validar_campos_obligatorios(cls, v: str) -> str:
+        if v is None:
+            raise ValueError("No puede ser nulo")
+
+        if not str(v).strip(): 
+            raise ValueError("El campo no puede estar vacío.")
+            
+        return v
+
 
     @field_validator("codigo_chofer", mode="before")
     @classmethod

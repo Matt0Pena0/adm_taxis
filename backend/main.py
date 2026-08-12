@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 from routers import recaudacion
 from routers import coche
 from routers import chofer
+from core.handlers import configure_exception_handlers
 from core.db import engine
 
 
@@ -55,6 +56,8 @@ app.add_middleware(
 app.include_router(recaudacion.router)
 app.include_router(coche.router)
 app.include_router(chofer.router)
+
+configure_exception_handlers(app)
 
 # Ruta test y raíz para verificar que está funcionando la API y rutas.
 

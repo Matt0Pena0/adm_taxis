@@ -62,8 +62,10 @@ const handleSaveChofer = async (choferData) => {
     await fetchChoferes();
     
   } catch (error) {
-    console.log(error)
-  
+    if (error.status === 422) {
+      errors.value = error.validationErrors;
+    }
+
   } finally {
     isLoading.value = false;
   }

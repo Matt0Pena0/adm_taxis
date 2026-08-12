@@ -47,7 +47,7 @@ watch(() => props.show, (newVal) => {
   }
 });
 
-const handleSubmit = () => emit('save', { ...form.value });
+const handleSave = () => emit('save', { ...form.value });
 </script>
 
 <template>
@@ -56,7 +56,7 @@ const handleSubmit = () => emit('save', { ...form.value });
     :title="recaudacionData ? 'Editar Recaudación Diaria' : 'Nueva Recaudación Diaria'" 
     @close="!isLoading && $emit('close')">
     
-    <form @submit.prevent="handleSubmit" class="space-y-6">
+    <form @submit.prevent="handleSave" class="space-y-6">
       
       <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-border-light dark:border-border-dark grid grid-cols-1 md:grid-cols-2 gap-4">
         <BaseSelect 
@@ -158,7 +158,9 @@ const handleSubmit = () => emit('save', { ...form.value });
 
     <template #footer>
       <BaseButton @click="$emit('close')">Cancelar</BaseButton>
-      <BaseButton variant="primary" @click="handleSubmit">Registrar Planilla</BaseButton>
+      <BaseButton variant="primary" :disabled="isLoading" @click="handleSave">
+        {{ isLoading ? 'Guardando...' : 'Registrar Recaudación' }}
+      </BaseButton>
     </template>
   </BaseModal>
 </template>

@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+
 import { apiFetch } from '@/services/api';
 import { formatCurrency, formatDate } from '@/utils/recaudacionFormato.js';
 import BaseButton from '@/components/BaseButton.vue';
@@ -33,6 +34,7 @@ const errors = ref({});
 // };
 
 
+// Establece la conexion con la API
 const fetchRecaudaciones = async () => {
   try {
     isLoading.value = true;
@@ -48,14 +50,14 @@ const fetchRecaudaciones = async () => {
 const handleSaveRecaudacion = async (recaudacionData) => {
   isLoading.value = true;
   errors.value = {}; // Limpiamos errores previos
+
   const formValues = {
     ...recaudacionData,
     // IDs (Selects devuelven strings, los forzamos a Int)
     chofer_id: Number(recaudacionData.chofer_id), 
     coche_id: Number(recaudacionData.coche_id),
     
-    // Montos (Inputs numéricos a veces vienen como strings)
-    // Usamos un ternario: Si está vacío (''), ponemos 0. Si hay dato, convertimos a Number.
+    // Usa un ternario: Si está vacío (''), ponemos 0. Si hay dato, convierte a Number.
     km_entrada: recaudacionData.km_entrada === '' ? 0 : Number(recaudacionData.km_entrada),
     km_salida: recaudacionData.km_salida === '' ? 0 : Number(recaudacionData.km_salida),
     total_recaudado: recaudacionData.total_recaudado === '' ? 0 : Number(recaudacionData.total_recaudado),
@@ -83,8 +85,22 @@ const handleSaveRecaudacion = async (recaudacionData) => {
     await fetchRecaudaciones();
 
   } catch (error) {
-    console.log(error)
+    // Si el error tiene una respuesta y es un 422, procesa los errores de validación
+    if (error.response && error.response.status === 422) {
+      const errorData = await error.response.json();
+      const newErrors = {};
+      if (errorData.detail && Array.isArray(errorData.detail)) {
+        errorData.detail.forEach(err => {
+          const fieldName = err.loc[err.loc.length - 1]; // Obtiene el nombre del campo
+          newErrors[fieldName] = err.msg;
+        });
+      }
+      errors.value = newErrors;
 
+      if (error.status === 422) {
+        errors.value = error.validationErrors;
+      }
+    }
   } finally {
     isLoading.value = false;
   }
@@ -162,7 +178,7 @@ onMounted(() => {
         <BaseButton icon="heroicons:plus"
         @click="abrirModalNuevaRecaudacion"
         >
-          Nueva Planilla
+          Nueva Recaudación
         </BaseButton>
 
         <ModalFromRecaudacion
@@ -227,8 +243,8 @@ onMounted(() => {
               </td>
 
               <td class="px-6 py-4 text-center">
-                <button class="text-slate-400 hover:text-primary transition-colors">
-                  <span class="material-symbols-outlined text-[20px]">visibility</span>
+                <button @click="abrirModalEditarRecaudacion(item)" class="text-slate-400 hover:text-primary transition-colors">
+                  <span class="material-symbols-outlined text-[20px]">edit</span>
                 </button>
               </td>
 

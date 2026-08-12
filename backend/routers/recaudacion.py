@@ -129,21 +129,28 @@ async def actualizar_recaudacion(
     Los campos omitidos o nulos se mantendrán con su valor original.
     """
 
-    recaudacion_db = await session.get(Recaudacion, recaudacion_id)
-    if not recaudacion_db:
+    # Obtiene la recaudación existente
+    db_recaudacion = await session.get(Recaudacion, recaudacion_id)
+    if not db_recaudacion:
         raise HTTPException(status_code=404, detail="Recaudación no encontrada")
 
+    # Actualiza los datos del modelo con los datos de entrada
     recaudacion_data = recaudacion_update.model_dump(exclude_unset=True)
-
     for key, value in recaudacion_data.items():
-        setattr(recaudacion_db, key, value)
+        setattr(db_recaudacion, key, value)
 
     try:
-        session.add(recaudacion_db)
+        session.add(db_recaudacion)
         await session.commit()
-        await session.refresh(recaudacion_db)
 
-        return recaudacion_db
+        # Vuelve a consultar la recaudación con sus relaciones (Eager Loading)
+        query = select(Recaudacion).where(Recaudacion.id == recaudacion_id).options(
+            joinedload(Recaudacion.chofer), joinedload(Recaudacion.coche) # type: ignore
+        )
+        result = await session.exec(query)
+        updated_recaudacion = result.one()
+
+        return updated_recaudacion
 
     except Exception as e:
         await session.rollback()
@@ -152,6 +159,7 @@ async def actualizar_recaudacion(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al actualizar la recaudación: {str(e)}"
         )
+
 
 @router.delete(
     "/{recaudacion_id}",

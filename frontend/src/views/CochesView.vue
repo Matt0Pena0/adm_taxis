@@ -62,8 +62,10 @@ const handleSaveCoche = async (cocheData) => {
     await fetchCoches();
 
   } catch (error) {
-    console.log(error)
-  
+    if (error.status === 422) {
+      errors.value = error.validationErrors;
+    }
+
   } finally {
     isLoading.value = false;
   }
