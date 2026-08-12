@@ -91,18 +91,18 @@ const handleSubmit = () => emit('save', { ...form.value });
 
       <div class="grid grid-cols-2 gap-4">
         <BaseInput 
-          v-model="form.km_salida" 
-          type="number" 
-          label="Km Salida" 
-          placeholder="0"
-          :error="errors.km_salida"
-        />
-        <BaseInput 
           v-model="form.km_entrada" 
           type="number" 
           label="Km Entrada" 
           placeholder="0"
           :error="errors.km_entrada"
+        />
+        <BaseInput 
+          v-model="form.km_salida" 
+          type="number" 
+          label="Km Salida" 
+          placeholder="0"
+          :error="errors.km_salida"
         />
       </div>
 

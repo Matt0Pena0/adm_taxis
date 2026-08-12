@@ -20,17 +20,17 @@ const opcionesTurno = ref([]);
 const errors = ref({});
 
 
-const formatearMensajeError = (msg) => {
-  // Limpia el prefijo del ValueError técnico de Pydantic
-  const cleanMsg = msg.replace("Value error, ", "");
+// const formatearMensajeError = (msg) => {
+//   // Limpia el prefijo del ValueError técnico de Pydantic
+//   const cleanMsg = msg.replace("Value error, ", "");
   
-  // Mapea los errores de "campo obligatorio"
-  if (cleanMsg === "Field required" || cleanMsg.includes("valid string")) {
-    return "Este campo es obligatorio.";
-  }
+//   // Mapea los errores de "campo obligatorio"
+//   if (cleanMsg === "Field required" || cleanMsg.includes("valid string")) {
+//     return "Este campo es obligatorio.";
+//   }
   
-  return cleanMsg; 
-};
+//   return cleanMsg; 
+// };
 
 
 const fetchRecaudaciones = async () => {
@@ -48,7 +48,6 @@ const fetchRecaudaciones = async () => {
 const handleSaveRecaudacion = async (recaudacionData) => {
   isLoading.value = true;
   errors.value = {}; // Limpiamos errores previos
-  console.log("Valores crudos del formulario:", recaudacionData);
   const formValues = {
     ...recaudacionData,
     // IDs (Selects devuelven strings, los forzamos a Int)
@@ -70,11 +69,6 @@ const handleSaveRecaudacion = async (recaudacionData) => {
     Object.entries(formValues).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
   );
 
-  console.log("Payload limpio a enviar:", cleanedData); // <--- Revisa esto en consola
-  // const cleanedData = Object.fromEntries(
-  //   Object.entries(recaudacionData).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
-  // );
-
   try {
     const isEditing = !!recaudacionSeleccionada.value?.id;
     const url = isEditing ? `/recaudaciones/${recaudacionSeleccionada.value.id}` : '/recaudaciones';
@@ -89,30 +83,8 @@ const handleSaveRecaudacion = async (recaudacionData) => {
     await fetchRecaudaciones();
 
   } catch (error) {
-    // Si entramos aquí, la API falló (422, 400, etc.)
-    try {
-      // Intentamos procesar el JSON de error
-      const rawError = JSON.parse(error.message);
-      
-      if (rawError.detail && Array.isArray(rawError.detail)) {
-        const mapErrors = {};
-        
-        rawError.detail.forEach(err => {
-          const field = err.loc[err.loc.length - 1]; 
-          mapErrors[field] = formatearMensajeError(err.msg);
-        });
+    console.log(error)
 
-        // Formatea y completa los errores en los inputs
-        errors.value = mapErrors;
-
-      } else if (typeof rawError.detail === 'string') {
-        alert("Aviso: " + rawError.detail);
-      }
-    } catch (e) {
-      // Si el error no es JSON muestra el alert genérico
-      console.error("No se pudo procesar el error:", error.message);
-      alert("Error de conexión o servidor");
-    }
   } finally {
     isLoading.value = false;
   }
@@ -159,10 +131,10 @@ const cerrarModal = () => {
 };
 
 
-// KPI CALCULADO (Ejemplo simple)
-const totalMensual = computed(() => {
-  return recaudaciones.value.reduce((acc, curr) => acc + Number(curr.total_recaudado || 0), 0);
-});
+// // KPI CALCULADO (Ejemplo simple)
+// const totalMensual = computed(() => {
+//   return recaudaciones.value.reduce((acc, curr) => acc + Number(curr.total_recaudado || 0), 0);
+// });
 
 
 onMounted(() => {
@@ -180,10 +152,12 @@ onMounted(() => {
       </div>
 
       <div class="flex gap-3">
+        <!-- 
         <div class="px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border border-border-light dark:border-border-dark text-right">
           <p class="text-xs text-slate-500 uppercase font-bold">Total Acumulado</p>
           <p class="text-xl font-bold text-primary-dark dark:text-primary">{{ formatCurrency(totalMensual) }}</p>
         </div>
+        -->
 
         <BaseButton icon="heroicons:plus"
         @click="abrirModalNuevaRecaudacion"

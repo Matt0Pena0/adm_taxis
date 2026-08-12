@@ -14,17 +14,17 @@ const isLoading = ref(true)
 const isModalOpen = ref(false)
 
 
-const formatearMensajeError = (msg) => {
-  // Limpia el prefijo del ValueError técnico de Pydantic
-  const cleanMsg = msg.replace("Value error, ", "");
+// const formatearMensajeError = (msg) => {
+//   // Limpia el prefijo del ValueError técnico de Pydantic
+//   const cleanMsg = msg.replace("Value error, ", "");
   
-  // Mapea los errores de "campo obligatorio"
-  if (cleanMsg === "Field required" || cleanMsg.includes("valid string")) {
-    return "Este campo es obligatorio.";
-  }
+//   // Mapea los errores de "campo obligatorio"
+//   if (cleanMsg === "Field required" || cleanMsg.includes("valid string")) {
+//     return "Este campo es obligatorio.";
+//   }
   
-  return cleanMsg; 
-};
+//   return cleanMsg; 
+// };
 
 
 // Establece la conexion con la API
@@ -62,30 +62,8 @@ const handleSaveChofer = async (choferData) => {
     await fetchChoferes();
     
   } catch (error) {
-    // Si entramos aquí, la API falló (422, 400, etc.)
-    try {
-      // Intentamos procesar el JSON de error
-      const rawError = JSON.parse(error.message);
-      
-      if (rawError.detail && Array.isArray(rawError.detail)) {
-        const mapErrors = {};
-        
-        rawError.detail.forEach(err => {
-          const field = err.loc[err.loc.length - 1]; 
-          mapErrors[field] = formatearMensajeError(err.msg);
-        });
-
-        // Formatea y completa los errores en los inputs
-        errors.value = mapErrors;
-
-      } else if (typeof rawError.detail === 'string') {
-        alert("Aviso: " + rawError.detail);
-      }
-    } catch (e) {
-      // Si el error no es JSON muestra el alert genérico
-      console.error("No se pudo procesar el error:", error.message);
-      alert("Error de conexión o servidor");
-    }
+    console.log(error)
+  
   } finally {
     isLoading.value = false;
   }
