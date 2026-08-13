@@ -20,22 +20,20 @@ services:
       - backend
 
   nginx:
-    image: nginx:alpine
-    container_name: adm_taxis-nginx
-    restart: unless-stopped
-    volumes:
-      - ./nginx/nginx-prod.conf:/etc/nginx/nginx.conf:ro
-    expose:
-      - "80"
-    networks:
-      - internal
-      - proxy_net
-    depends_on:
-      - backend
-      - frontend
+      image: nginx:alpine
+      container_name: adm-taxis-nginx
+      restart: unless-stopped
+      volumes:
+        - ./nginx/nginx-prod.conf:/etc/nginx/nginx.conf:ro
+      networks:
+        - internal
+        - proxy-network
+      depends_on:
+        - backend
+        - frontend
 
 networks:
   internal:
     driver: bridge
-  proxy_net:
+  proxy-network:
     external: true

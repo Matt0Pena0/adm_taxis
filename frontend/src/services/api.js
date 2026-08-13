@@ -1,5 +1,5 @@
-// Lee la variable de entorno según el modo (dev o prod)
-const BASE_URL = import.meta.env.VITE_API_URL;
+const rawUrl = import.meta.env.VITE_API_URL;
+const BASE_URL = (rawUrl && rawUrl !== 'undefined' && rawUrl !== 'null') ? rawUrl : '/api';
 
 // Exporta una función helper para hacer las peticiones
 export const apiFetch = async (endpoint, options = {}) => {

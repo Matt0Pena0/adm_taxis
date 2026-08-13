@@ -20,7 +20,7 @@ services:
       - ./frontend:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=http://localhost:8000
+      - VITE_API_URL=http://localhost:8000/api
 
   nginx:
     # Disable internal Nginx in local dev to avoid dependency on proxy_net external network

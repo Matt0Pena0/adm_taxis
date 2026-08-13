@@ -53,9 +53,9 @@ app.add_middleware(
 
 
 # Rutas
-app.include_router(recaudacion.router)
-app.include_router(coche.router)
-app.include_router(chofer.router)
+app.include_router(recaudacion.router, prefix="/api")
+app.include_router(coche.router, prefix="/api")
+app.include_router(chofer.router, prefix="/api")
 
 configure_exception_handlers(app)
 
