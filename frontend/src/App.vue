@@ -15,7 +15,7 @@ const toggleSidebar = () => {
 </script>
 
 <template>
-  <div class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 h-screen w-full flex overflow-hidden">
+  <div class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 h-screen w-full min-h-screen-100 flex flex-col overflow-hidden">
     <div class="flex-1 flex flex-col h-full relative overflow-hidden">
       <!-- Pasamos el evento para que el Navbar pueda abrir la Sidebar -->
       <Navbar @toggle-sidebar="toggleSidebar" />

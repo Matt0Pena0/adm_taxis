@@ -4,7 +4,7 @@ import { ref, onMounted, computed } from 'vue';
 import { apiFetch } from '@/services/api';
 import { formatCurrency, formatDate } from '@/utils/recaudacionFormato.js';
 import BaseButton from '@/components/BaseButton.vue';
-import ModalFromRecaudacion from '@/components/modals/ModalFromRecaudacion.vue';
+import ModalFormRecaudacion from '@/components/modals/ModalFormRecaudacion.vue';
 
 
 const recaudaciones = ref([]);
@@ -181,7 +181,7 @@ onMounted(() => {
           Nueva Recaudación
         </BaseButton>
 
-        <ModalFromRecaudacion
+        <ModalFormRecaudacion
           :show="isModalOpen"
           :choferes="choferes"
           :coches="coches"
