@@ -27,7 +27,7 @@ services:
         - ./nginx/nginx-prod.conf:/etc/nginx/nginx.conf:ro
       networks:
         - internal
-        - proxy-network
+        - proxy_net
       depends_on:
         - backend
         - frontend
@@ -35,5 +35,5 @@ services:
 networks:
   internal:
     driver: bridge
-  proxy-network:
+  proxy_net:
     external: true
