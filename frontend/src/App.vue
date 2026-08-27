@@ -15,16 +15,16 @@ const toggleSidebar = () => {
 </script>
 
 <template>
-  <div class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 h-screen w-full min-h-screen-100 flex flex-col overflow-hidden">
-    <div class="flex-1 flex flex-col h-full relative overflow-hidden">
+  <div class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 h-screen h-[100dvh] w-full flex flex-col overflow-hidden">
+    <div class="flex-1 flex flex-col h-full min-h-0 relative overflow-hidden">
       <!-- Pasamos el evento para que el Navbar pueda abrir la Sidebar -->
       <Navbar @toggle-sidebar="toggleSidebar" />
 
-      <div class="flex flex-1 overflow-hidden">
+      <div class="flex flex-1 overflow-hidden min-h-0">
         <!-- Componente de Diseño para la Sidebar -->
         <Sidebar :is-open="isSidebarOpen" @close="isSidebarOpen = false" />
 
-        <main class="flex-1 overflow-y-auto p-6 md:p-10">
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 lg:p-10 custom-scrollbar">
           <div class="max-w-7xl mx-auto w-full">
             <RouterView />
           </div>

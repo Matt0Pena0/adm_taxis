@@ -32,26 +32,26 @@ onUnmounted(() => window.removeEventListener('keydown', handleEsc))
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
-      <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-hidden">
         <div 
           class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" 
           @click="closeModal"
         ></div>
 
-        <div class="relative w-full max-w-lg bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden transform transition-all">
+        <div class="relative w-full max-w-lg max-h-[calc(100dvh-2rem)] sm:max-h-[85vh] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col transform transition-all my-auto">
           
-          <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+          <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between shrink-0">
             <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ title }}</h3>
             <button @click="closeModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
               <span class="i-heroicons-x-mark w-6 h-6"></span>
             </button>
           </div>
 
-          <div class="px-6 py-4">
+          <div class="px-6 py-4 overflow-y-auto flex-1 custom-scrollbar">
             <slot />
           </div>
 
-          <div v-if="$slots.footer" class="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-3">
+          <div v-if="$slots.footer" class="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-3 shrink-0">
             <slot name="footer" />
           </div>
         </div>
