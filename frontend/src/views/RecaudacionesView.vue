@@ -110,9 +110,9 @@ const handleSaveRecaudacion = async (recaudacionData) => {
 const fetchListasAuxiliares = async () => {
   try {
     const [resChoferes, resCoches, resTurnos] = await Promise.all([
-      apiFetch('/choferes'),
-      apiFetch('/coches'),
-      apiFetch('/recaudaciones/enums/turnos'),
+      apiFetch('/choferes/'),
+      apiFetch('/coches/'),
+      apiFetch('/recaudaciones/enums/turnos/'),
     ]);
     choferes.value = resChoferes;
     coches.value = resCoches;

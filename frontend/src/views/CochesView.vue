@@ -75,7 +75,7 @@ const handleSaveCoche = async (cocheData) => {
 const estadosCoche = ref([]);
 const fetchEnums = async () => {
   try {
-    const data = await apiFetch('coches/enums/estados');
+    const data = await apiFetch('coches/enums/estados/');
     estadosCoche.value = data;
   } catch (error) {
     console.error("Error cargando enums", error)

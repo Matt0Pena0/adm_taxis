@@ -1,25 +1,31 @@
 const rawUrl = import.meta.env.VITE_API_URL;
 const BASE_URL = (rawUrl && rawUrl !== 'undefined' && rawUrl !== 'null') ? rawUrl : '/api';
+const cleanBaseUrl = BASE_URL.replace(/\/+$/, '');
 
 // Exporta una función helper para hacer las peticiones
 export const apiFetch = async (endpoint, options = {}) => {
     // Asegura que el endpoint empiece con /
-    const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    let path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+
+    // Asegura que termine en / si no tiene query params ni extensión (evita redirecciones 307 de FastAPI)
+    if (!path.endsWith('/') && !path.includes('?') && !path.includes('.')) {
+        path += '/';
+    }
     
     // Construye la URL completa
-    const url = `${BASE_URL}${path}`;
+    const url = `${cleanBaseUrl}${path}`;
 
     console.log(`📡 Llamando a API: ${url}`); // Log para debug
 
     const response = await fetch(url, {
         ...options,
         headers: {
-        'Content-Type': 'application/json',
-        ...options.headers, // Permite sobreescribir headers si es necesario
+            'Content-Type': 'application/json',
+            ...options.headers, // Permite sobreescribir headers si es necesario
         },
     });
 
-    // Muestra mensaje de error si no recibe un HTTP Status200
+    // Muestra mensaje de error si no recibe un HTTP Status 200-299
     if (!response.ok) {
         const errorText = await response.text();
 
@@ -29,4 +35,5 @@ export const apiFetch = async (endpoint, options = {}) => {
     return response.json();
 };
 
-export const API_URL = BASE_URL;
+export const API_URL = cleanBaseUrl;
+

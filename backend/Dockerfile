@@ -54,4 +54,4 @@ COPY --from=builder /root/.local /root/.local
 COPY . .
 
 # Comando optimizado para producción (sin reload)
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

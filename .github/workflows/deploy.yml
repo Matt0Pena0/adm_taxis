@@ -126,6 +126,7 @@ jobs:
 
             docker compose pull
             docker compose up -d
+            docker compose restart nginx
             docker image prune -f
 
       # --- Post-deploy health check ---
@@ -140,7 +141,7 @@ jobs:
           script: |
             echo "Waiting for services to stabilize..."
             sleep 15
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/ || echo "000")
+            HTTP_CODE=$(docker exec adm-taxis-nginx wget -q -S -O /dev/null http://127.0.0.1/api/ 2>&1 | grep "HTTP/" | awk '{print $2}' | tail -n 1 || echo "000")
             if [ "$HTTP_CODE" = "200" ]; then
               echo "✅ Health check passed (HTTP $HTTP_CODE)"
             else

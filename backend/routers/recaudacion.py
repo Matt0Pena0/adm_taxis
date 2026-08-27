@@ -106,7 +106,7 @@ async def leer_recaudacion(
     return recaudacion
 
 
-@router.get("/enums/turnos")
+@router.get("/enums/turnos/")
 async def get_turnos():
     """Retorna una lista de objetos con label y value"""
     return [{"label": e.value, "value": e.value} for e in Turnos]

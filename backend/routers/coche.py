@@ -121,7 +121,7 @@ async def obtener_coche(
     return coche
 
 
-@router.get("/enums/estados")
+@router.get("/enums/estados/")
 async def get_estados_coche():
     """Retorna una lista de objetos con label y value"""
     return [{"label": e.value, "value": e.value} for e in EstadoCoche]

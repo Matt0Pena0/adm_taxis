@@ -123,7 +123,7 @@ async def leer_chofer(
     return chofer
 
 
-@router.get("/enums/estados")
+@router.get("/enums/estados/")
 async def get_estados_chofer():
     """Retorna una lista de objetos con label y value"""
     return [{"label": e.value, "value": e.value} for e in EstadoChofer]
